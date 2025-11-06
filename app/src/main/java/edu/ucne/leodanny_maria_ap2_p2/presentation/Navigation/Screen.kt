@@ -1,8 +1,16 @@
 package edu.ucne.leodanny_maria_ap2_p2.presentation.Navigation
 
-import kotlinx.serialization.Serializable
-
-sealed class Screen {
-    @Serializable
-    data object HomeScreen : Screen()
+// Screen.kt (actualizado)
+sealed class Screen(val route: String) {
+    object HomeScreen : Screen("home_screen")
+    object GastosListScreen : Screen("gastos_list_screen")
+    object GastosScreen : Screen("gastos_screen") {
+        fun createRoute(gastoId: Int? = null): String {
+            return if (gastoId != null) {
+                "gastos_screen?gastoId=$gastoId"
+            } else {
+                "gastos_screen"
+            }
+        }
+    }
 }
