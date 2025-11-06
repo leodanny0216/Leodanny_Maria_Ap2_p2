@@ -4,5 +4,4 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class  Leodanny_Maria_Ap2_p2: Application() {
-}
+class Leodanny_Maria_Ap2_p2 : Application()
