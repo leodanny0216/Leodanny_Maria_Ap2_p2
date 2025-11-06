@@ -26,9 +26,46 @@ fun GastosListScreen(
     viewModel: GastosViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var gastoToDelete by remember { mutableStateOf<GastoDto?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadGastos()
+    }
+
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                gastoToDelete = null
+            },
+            title = { Text("Eliminar Gasto") },
+            text = { Text("¿Estás seguro de que quieres eliminar este gasto? Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        gastoToDelete?.let { gasto ->
+                            viewModel.deleteGasto(gasto.gastoId)
+                        }
+                        showDeleteDialog = false
+                        gastoToDelete = null
+                    }
+                ) {
+                    Text("Eliminar", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        gastoToDelete = null
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -102,7 +139,8 @@ fun GastosListScreen(
                                     navController.navigate("${Screen.GastosScreen.route}?gastoId=${gasto.gastoId}")
                                 },
                                 onDeleteClick = {
-                                    viewModel.deleteGasto(gasto.gastoId)
+                                    gastoToDelete = gasto
+                                    showDeleteDialog = true
                                 }
                             )
                         }
@@ -112,7 +150,6 @@ fun GastosListScreen(
         }
     }
 }
-
 @Composable
 fun GastosListItem(
     gasto: GastoDto,

@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+
 @HiltViewModel
 class GastosViewModel @Inject constructor(
     private val repository: GastosRepository
@@ -57,11 +59,17 @@ class GastosViewModel @Inject constructor(
 
     fun deleteGasto(id: Int) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
                 val success = repository.deleteGasto(id)
                 if (success) {
-                    loadGastos() // Recargar la lista después de eliminar
+                    // Actualizar la lista localmente sin recargar toda la lista
+                    val currentGastos = _uiState.value.gastos.toMutableList()
+                    currentGastos.removeAll { it.gastoId == id }
+                    _uiState.value = _uiState.value.copy(
+                        gastos = currentGastos,
+                        isLoading = false
+                    )
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
@@ -79,7 +87,7 @@ class GastosViewModel @Inject constructor(
 
     fun saveGasto(gasto: GastoDto) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
                 val success = if (gasto.gastoId == 0) {
                     repository.createGasto(gasto)
